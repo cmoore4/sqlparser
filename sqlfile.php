@@ -1,16 +1,20 @@
 <?php
 
 namespace SQLParser;
+include 'sqltable.php';
 
 class Sqlfile {
 
 	public $fileHandle;
 	public $fileName;
+	public $dialect;
 	public $statements = array();
+	public $tables = array();
 
-	public function __construct($filename){
+	public function __construct($filename, $dialect = 'mysql'){
 
 		$this->fileName = $filename;
+		$this->dialect = $dialect;
 
 		// Open the file
 		try{
@@ -29,8 +33,12 @@ class Sqlfile {
 		$statement = '';
 
 		// This regex will find any line that ends with a semi-colon, the end of a statement
+		// TODO: this is naieve.  Will never detect multi-line statements.  Also, will detect
+		// any end-line semi-colon, even if it's in a string, ex ';\n'
 		$endRegex = '/.*;\s*$/';
+
 		// Finds lines that begin with '--'
+		// TODO: add parsing/stripping intra-line comments: SELECT abc, def -- def is a column
 		$commentRegex = '/\s*--.*/';
 
 		// Explode file by ';' in a memory-sane way
@@ -50,6 +58,15 @@ class Sqlfile {
 			if(preg_match($endRegex, $statement) === 1){
 				$this->statements[] = $statement;
 				$statement = '';
+			}
+		}
+	}
+
+	public function parseTables(){
+		$tableRegex = '/\w*CREATE (TEMPORARY )?TABLE.*/i';
+		foreach($this->statements as $statement){
+			if(preg_match($tableRegex, $statement) === 1){
+				$this->tables[] = new Sqltable($statement);
 			}
 		}
 	}
