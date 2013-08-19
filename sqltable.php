@@ -1,5 +1,6 @@
 <?php
 namespace SQLParser;
+include 'sqlcolumn.php';
 
 class Sqltable {
 
@@ -11,7 +12,7 @@ class Sqltable {
 
 	protected $name;
 
-	protected $rows = array();
+	protected $columns = array();
 	protected $fieldDefinitions;
 
 	public function __construct($statement){
@@ -34,25 +35,35 @@ class Sqltable {
 	protected function parseField($allfields){
 		$this->fieldDefinitions =  $this->parseLines($allfields);
 		print "\n\n{$this->name} :\n";
-		foreach($this->fieldDefinitions as $def){ print "\t$def\n"; }
+		foreach($this->fieldDefinitions as $def){
+			$reserved_words = array('foreign', 'key', 'primary', 'constraint', 'fulltext', 'spacial', 'check');
+			$name = strtok($def, ' ');
+
+			if(in_array(strtolower($name), $reserved_words)){
+				//TODO: new Sqlconstraint($def)
+				return null;
+			} else {
+				$columns[] = new Sqlcolumn($def);
+			}
+		}
 	}
 
 	protected function parseLines($allFields){
-		
+
 		$endable = true;
 		$length = 0;
 		$start = 0;
 		$lines = array();
-		
+
 		foreach(str_split($allFields) as $char){
-			
-			if($char === '('){ 
-				$endable = false; 
+
+			if($char === '('){
+				$endable = false;
 			} elseif ($char === ')') {
-				$endable = true;	
+				$endable = true;
 			}
 
-			if($endable && ($char === ',')){
+			if(($endable && ($char === ',')) || $start+$length+1 == strlen($allFields)){
 				$lines[] = substr($allFields, $start, $length);
 				$start = $start+$length+1;
 				$length = 0;

@@ -19,8 +19,8 @@ class Sqlfile {
 		try{
 			$this->fileHandle = new \SplFileObject($filename);
 			$this->fileHandle->setFlags(
-				\SplFileObject::DROP_NEW_LINE + 
-				\SplFileObject::READ_AHEAD + 
+				\SplFileObject::DROP_NEW_LINE +
+				\SplFileObject::READ_AHEAD +
 				\SplFileObject::SKIP_EMPTY);
 
 		} catch (Exception $e){
@@ -42,7 +42,7 @@ class Sqlfile {
 
 		// Explode file by ';' in a memory-sane way
 		while (!$this->fileHandle->eof()){
-			
+
 			//read the next line, append it to any open statements
 			$line = $this->fileHandle->fgets();
 
