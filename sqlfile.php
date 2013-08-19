@@ -1,5 +1,4 @@
 <?php
-
 namespace SQLParser;
 include 'sqltable.php';
 
@@ -60,6 +59,8 @@ class Sqlfile {
 				$statement = '';
 			}
 		}
+
+		$this->fileHandle = null;
 	}
 
 	public function parseTables(){
